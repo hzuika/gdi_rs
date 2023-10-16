@@ -22,8 +22,8 @@ impl<'a> ManagedDC<'a> {
 impl<'a> Drop for ManagedDC<'a> {
     fn drop(&mut self) {
         unsafe {
-            let res = ReleaseDC(self.hwnd, self.hdc);
-            assert_eq!(res, 1);
+            let result = ReleaseDC(self.hwnd, self.hdc);
+            assert_eq!(result, 1);
         }
     }
 }
