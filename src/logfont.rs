@@ -27,6 +27,7 @@ impl<const N: usize> fmt::Display for UTF16String<N> {
     }
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub struct LogFont {
     pub lf_face_name: UTF16String<32>,
     pub lf_weight: i32,
