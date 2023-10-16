@@ -6,6 +6,9 @@ use windows::Win32::{
     },
 };
 
+// ------------------------------
+// GetFontData
+// ------------------------------
 pub fn get_font_data(hdc: HDC, dwtable: u32, dwoffset: u32) -> Option<Vec<u8>> {
     let size = unsafe { GetFontData(hdc, dwtable, dwoffset, None, 0) };
     if size == GDI_ERROR as _ || size == 0 {
@@ -28,6 +31,9 @@ pub fn has_font_data(hdc: HDC, dwtable: u32, dwoffset: u32) -> bool {
     }
 }
 
+// ------------------------------
+// HDC
+// ------------------------------
 pub struct ManagedDC<'a> {
     pub hdc: HDC,
     pub hwnd: Option<&'a HWND>,
