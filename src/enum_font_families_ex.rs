@@ -1,6 +1,9 @@
 use windows::Win32::{
     Foundation::LPARAM,
-    Graphics::Gdi::{EnumFontFamiliesExW, FONT_CHARSET, LOGFONTW, TEXTMETRICW},
+    Graphics::Gdi::{
+        EnumFontFamiliesExW, DEVICE_FONTTYPE, ENUMLOGFONTEXDVW, ENUMLOGFONTEXW, FONT_CHARSET,
+        LOGFONTW, RASTER_FONTTYPE, TEXTMETRICW, TRUETYPE_FONTTYPE,
+    },
 };
 
 use crate::hdc::ManagedDC;
@@ -11,6 +14,56 @@ pub struct EnumFontFamExProcArgs {
     pub lpntme: *const TEXTMETRICW,
     pub fonttype: u32,
 }
+
+impl EnumFontFamExProcArgs {
+    pub fn get_logfont(&self) -> Option<&LOGFONTW> {
+        if self.lpelfe.is_null() {
+            None
+        } else {
+            unsafe { Some(&*self.lpelfe) }
+        }
+    }
+
+    pub fn get_enum_logfont_ex(&self) -> Option<&ENUMLOGFONTEXW> {
+        if self.lpelfe.is_null() {
+            None
+        } else {
+            unsafe { Some(&*(self.lpelfe as *const ENUMLOGFONTEXW)) }
+        }
+    }
+
+    pub fn get_enum_logfont_ex_dv(&self) -> Option<&ENUMLOGFONTEXDVW> {
+        if self.lpelfe.is_null() {
+            None
+        } else {
+            unsafe { Some(&*(self.lpelfe as *const ENUMLOGFONTEXDVW)) }
+        }
+    }
+
+    pub fn is_device(&self) -> bool {
+        (self.fonttype & DEVICE_FONTTYPE) != 0
+    }
+
+    pub fn is_raster(&self) -> bool {
+        (self.fonttype & RASTER_FONTTYPE) != 0
+    }
+
+    pub fn is_truetype(&self) -> bool {
+        (self.fonttype & TRUETYPE_FONTTYPE) != 0
+    }
+
+    // TODO: 本当に OpenType ?
+    pub fn is_opentype(&self) -> bool {
+        if self.is_raster() {
+            false
+        } else if !self.is_device() && !self.is_truetype() {
+            false
+        } else {
+            true
+        }
+    }
+}
+
 type EnumFontFamExProcBox<'a> =
     Box<dyn FnMut(EnumFontFamExProcArgs) -> EnumFontFamExProcReturn + 'a>;
 

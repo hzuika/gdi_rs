@@ -5,6 +5,10 @@ use windows::{
     Win32::Graphics::Gdi::{ENUMLOGFONTEXDVW, ENUMLOGFONTEXW, LOGFONTW},
 };
 
+pub fn is_vertical(logfont: &LOGFONTW) -> bool {
+    logfont.lfFaceName[0] == '@' as u16
+}
+
 // [WCHAR; N] wrapper
 #[derive(PartialEq, Eq, Hash)]
 pub struct UTF16String<const N: usize>(pub [u16; N]);
