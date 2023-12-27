@@ -6,6 +6,7 @@ use windows::Win32::Graphics::Gdi::DEFAULT_CHARSET;
 
 type Names = HashSet<String>;
 fn main() -> anyhow::Result<()> {
+    println!("EnumFontFamiliesEx() で取得できる LOGFONTW.lfFaceName を表示する．");
     let mut names = Names::new();
     enum_font_families_ex([0; 32], DEFAULT_CHARSET, |args| {
         if !args.is_opentype() {
@@ -22,10 +23,13 @@ fn main() -> anyhow::Result<()> {
     let mut names: Vec<String> = names.into_iter().collect();
     names.sort();
 
+    println!("font count {}", names.len());
+
     let parent = std::path::Path::new(file!()).parent().unwrap();
-    let path = parent.join("./out.txt");
+    let path = parent.join("./out.tsv");
     let mut file = std::fs::File::create(path).unwrap();
-    writeln!(&mut file, "font count {}", names.len())?;
+
+    writeln!(&mut file, "lfFaceName")?;
     for name in names {
         writeln!(&mut file, "{}", name)?;
     }

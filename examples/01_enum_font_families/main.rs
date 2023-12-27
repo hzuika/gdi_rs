@@ -1,31 +1,24 @@
 use std::collections::HashSet;
 use std::io::Write;
 
-use gdi_rs::{enum_font_families_ex, LogFont};
-use windows::Win32::Graphics::Gdi::{
-    DEFAULT_CHARSET, DEVICE_FONTTYPE, ENUMLOGFONTEXDVW, RASTER_FONTTYPE, TRUETYPE_FONTTYPE,
-};
+use gdi_rs::{enum_font_families_ex, is_vertical, LogFont};
+use windows::Win32::Graphics::Gdi::{DEFAULT_CHARSET, ENUMLOGFONTEXDVW};
 
 type LogFonts = HashSet<LogFont>;
 fn main() -> anyhow::Result<()> {
     let mut logfonts = LogFonts::new();
     enum_font_families_ex([0; 32], DEFAULT_CHARSET, |args| {
-        let is_device = args.fonttype & DEVICE_FONTTYPE != 0;
-        let is_raster = args.fonttype & RASTER_FONTTYPE != 0;
-        let is_truetype = args.fonttype & TRUETYPE_FONTTYPE != 0;
-        if is_raster {
+        if !args.is_opentype() {
             return 1;
         }
-        if !is_device && !is_truetype {
+
+        let logfont = args.get_logfont().unwrap();
+        if is_vertical(logfont) {
             return 1;
         }
 
         let enum_logfont_ex_dv = unsafe { &*(args.lpelfe as *const ENUMLOGFONTEXDVW) };
         let logfont = LogFont::new_from_enum_logfont_ex_dv(enum_logfont_ex_dv);
-        let lf_face_name = logfont.lf_face_name.to_string();
-        if lf_face_name.to_string().starts_with("@") {
-            return 1;
-        }
         logfonts.insert(logfont);
         return 1;
     });
