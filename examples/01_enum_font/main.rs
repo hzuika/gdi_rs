@@ -1,35 +1,21 @@
 use std::collections::HashSet;
 use std::io::Write;
 
-use gdi_rs::enum_font_families_ex;
-use windows::{
-    core::PCWSTR,
-    Win32::Graphics::Gdi::{DEFAULT_CHARSET, DEVICE_FONTTYPE, RASTER_FONTTYPE, TRUETYPE_FONTTYPE},
-};
+use gdi_rs::{enum_font_families_ex, is_vertical, UTF16String};
+use windows::Win32::Graphics::Gdi::DEFAULT_CHARSET;
 
 type Names = HashSet<String>;
 fn main() -> anyhow::Result<()> {
     let mut names = Names::new();
     enum_font_families_ex([0; 32], DEFAULT_CHARSET, |args| {
-        let is_device = args.fonttype & DEVICE_FONTTYPE != 0;
-        let is_raster = args.fonttype & RASTER_FONTTYPE != 0;
-        let is_truetype = args.fonttype & TRUETYPE_FONTTYPE != 0;
-        if is_raster {
+        if !args.is_opentype() {
             return 1;
         }
-        if !is_device && !is_truetype {
+        let logfont = args.get_logfont().unwrap();
+        if is_vertical(logfont) {
             return 1;
         }
-
-        let logfont = unsafe { &*args.lpelfe };
-        let name = unsafe {
-            PCWSTR::from_raw(logfont.lfFaceName.as_ptr())
-                .to_string()
-                .unwrap()
-        };
-        if name.starts_with("@") {
-            return 1;
-        }
+        let name = UTF16String(logfont.lfFaceName).to_string();
         names.insert(name);
         return 1;
     });
