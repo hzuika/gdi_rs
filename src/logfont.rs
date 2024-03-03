@@ -2,8 +2,64 @@ use core::fmt;
 
 use windows::{
     core::PCWSTR,
-    Win32::Graphics::Gdi::{ENUMLOGFONTEXDVW, ENUMLOGFONTEXW, LOGFONTW},
+    Win32::Graphics::Gdi::{
+        ANSI_CHARSET, ARABIC_CHARSET, BALTIC_CHARSET, CHINESEBIG5_CHARSET, DEFAULT_CHARSET,
+        EASTEUROPE_CHARSET, ENUMLOGFONTEXDVW, ENUMLOGFONTEXW, FONT_CHARSET, GB2312_CHARSET,
+        GREEK_CHARSET, HANGUL_CHARSET, HEBREW_CHARSET, JOHAB_CHARSET, LOGFONTW, MAC_CHARSET,
+        OEM_CHARSET, RUSSIAN_CHARSET, SHIFTJIS_CHARSET, SYMBOL_CHARSET, THAI_CHARSET,
+        TURKISH_CHARSET, VIETNAMESE_CHARSET,
+    },
 };
+
+#[derive(Debug)]
+pub enum CharSet {
+    ANSI,
+    BALTIC,
+    CHINESEBIG5,
+    DEFAULT,
+    EASTEUROPE,
+    GB2312,
+    GREEK,
+    HANGUL,
+    MAC,
+    OEM,
+    RUSSIAN,
+    SHIFTJIS,
+    SYMBOL,
+    TURKISH,
+    VIETNAMESE,
+    JOHAB,
+    ARABIC,
+    HEBREW,
+    THAI,
+}
+
+impl From<FONT_CHARSET> for CharSet {
+    fn from(value: FONT_CHARSET) -> Self {
+        match value {
+            ANSI_CHARSET => Self::ANSI,
+            BALTIC_CHARSET => Self::BALTIC,
+            CHINESEBIG5_CHARSET => Self::CHINESEBIG5,
+            DEFAULT_CHARSET => Self::DEFAULT,
+            EASTEUROPE_CHARSET => Self::EASTEUROPE,
+            GB2312_CHARSET => Self::GB2312,
+            GREEK_CHARSET => Self::GREEK,
+            HANGUL_CHARSET => Self::HANGUL,
+            MAC_CHARSET => Self::MAC,
+            OEM_CHARSET => Self::OEM,
+            RUSSIAN_CHARSET => Self::RUSSIAN,
+            SHIFTJIS_CHARSET => Self::SHIFTJIS,
+            SYMBOL_CHARSET => Self::SYMBOL,
+            TURKISH_CHARSET => Self::TURKISH,
+            VIETNAMESE_CHARSET => Self::VIETNAMESE,
+            JOHAB_CHARSET => Self::JOHAB,
+            ARABIC_CHARSET => Self::ARABIC,
+            HEBREW_CHARSET => Self::HEBREW,
+            THAI_CHARSET => Self::THAI,
+            _ => panic!("invalid charset"),
+        }
+    }
+}
 
 pub fn is_vertical(logfont: &LOGFONTW) -> bool {
     logfont.lfFaceName[0] == '@' as u16
